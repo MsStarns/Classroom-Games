@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stop and GIST! Reading Practice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Base styles for kid-friendly typography */
+        body {
+            font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f9ff;
+            color: #334155;
+            font-size: 18px; /* Requirement: At least 18px */
+            line-height: 1.6;
+        }
+
+        /* Stop Sign CSS Shape */
+        .stop-sign {
+            width: 140px;
+            height: 140px;
+            background-color: #ef4444; /* Tailwind red-500 */
+            clip-path: polygon(29% 0, 71% 0, 100% 29%, 100% 71%, 71% 100%, 29% 100%, 0 71%, 0 29%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .stop-sign-inner {
+            width: 124px;
+            height: 124px;
+            border: 4px solid white;
+            clip-path: polygon(29% 0, 71% 0, 100% 29%, 100% 71%, 71% 100%, 29% 100%, 0 71%, 0 29%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-align: center;
+            line-height: 1.1;
+        }
+
+        .stop-text { font-size: 26px; }
+        .gist-text { font-size: 16px; }
+
+        /* Custom Button Transitions */
+        .option-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Reading Passage styling */
+        .passage {
+            font-size: 1.125rem; /* 18px */
+            background-color: #fffbeb; /* Light yellow to look like a reading card */
+            border-left: 6px solid #fbbf24;
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Fade in animation */
+        .fade-in {
+            animation: fadeIn 0.4s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
+
+    <!-- Main Content Card -->
+    <div class="w-full max-w-3xl bg-white rounded-2xl shadow-xl overflow-hidden relative fade-in" id="app-container">
+        
+        <!-- ================= INTRO SCREEN ================= -->
+        <div id="intro-screen" class="p-8 text-center">
+            <div class="stop-sign mb-6">
+                <div class="stop-sign-inner">
+                    <span class="stop-text">STOP</span>
+                    <span class="gist-text">& GIST</span>
+                </div>
+            </div>
+            
+            <h1 class="text-4xl font-extrabold text-blue-800 mb-4">Reading for GIST</h1>
+            
+            <div class="text-left text-xl bg-blue-50 p-6 rounded-xl mb-8 space-y-4 shadow-sm border border-blue-100">
+                <p><strong>What is a GIST?</strong></p>
+                <p>A GIST is a <strong>one-sentence summary</strong> that answers the most important questions about what you just read:</p>
+                <ul class="list-disc list-inside font-bold text-blue-600 pl-4">
+                    <li>Who?</li>
+                    <li>What?</li>
+                    <li>When? / Where?</li>
+                    <li>Why? / How?</li>
+                </ul>
+                <p class="mt-4 border-t border-blue-200 pt-4">
+                    🚦 Good readers know they need to <strong>"Stop and GIST."</strong> After a big paragraph, pause like you are at a Stop Sign. Ask yourself: <em>"What was that mostly about?"</em>
+                </p>
+            </div>
+
+            <button onclick="startPractice()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-full text-2xl shadow-lg transition transform hover:scale-105 active:scale-95">
+                Start Practice! 🚀
+            </button>
+        </div>
+
+        <!-- ================= QUIZ SCREEN ================= -->
+        <div id="quiz-screen" class="hidden flex-col h-full">
+            <!-- Header & Progress -->
+            <div class="bg-blue-600 p-4 text-white flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="stop-sign" style="width: 40px; height: 40px;">
+                        <div class="stop-sign-inner" style="width: 34px; height: 34px; border-width: 2px;">
+                            <span style="font-size: 8px;">STOP</span>
+                        </div>
+                    </div>
+                    <span class="font-bold text-xl">Stop & GIST</span>
+                </div>
+                <div class="font-bold text-lg" id="progress-text">Question 1 of 15</div>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="w-full bg-blue-200 h-2">
+                <div id="progress-fill" class="bg-yellow-400 h-2 transition-all duration-300" style="width: 0%;"></div>
+            </div>
+
+            <!-- Question Content -->
+            <div class="p-6 md:p-8 flex-grow fade-in" id="question-content">
+                <div class="passage shadow-sm" id="passage-text">
+                    <!-- Passage text injected here -->
+                </div>
+
+                <h3 class="text-xl font-bold mb-4 text-gray-700">Which sentence is the perfect GIST?</h3>
+                
+                <div class="space-y-3" id="options-container">
+                    <!-- Options injected here -->
+                </div>
+
+                <!-- Feedback Area -->
+                <div id="feedback-area" class="mt-6 p-4 rounded-lg hidden text-lg border-2">
+                    <div class="flex items-start">
+                        <span id="feedback-icon" class="text-3xl mr-3"></span>
+                        <div>
+                            <h4 id="feedback-title" class="font-bold text-xl mb-1"></h4>
+                            <p id="feedback-text"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Next Button -->
+                <div class="mt-8 flex justify-end">
+                    <button id="next-btn" onclick="nextQuestion()" class="hidden bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full text-xl shadow-md transition transform hover:scale-105">
+                        Next Paragraph ➡️
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= RESULTS SCREEN ================= -->
+        <div id="results-screen" class="hidden p-8 text-center fade-in">
+            <h2 class="text-4xl font-extrabold text-blue-800 mb-6">Practice Complete! 🎉</h2>
+            <div class="text-2xl mb-8">
+                You found the perfect GIST <span id="score-text" class="font-bold text-green-600 text-4xl"></span> times!
+            </div>
+            
+            <div class="bg-gray-100 p-6 rounded-xl mb-8 text-left text-lg max-w-lg mx-auto shadow-inner">
+                <h3 class="font-bold text-xl mb-2 text-center">Remember the GIST rules:</h3>
+                <ul class="space-y-2">
+                    <li>✅ <strong>Perfect GIST:</strong> Covers the big Who, What, and Why.</li>
+                    <li>❌ <strong>Too Specific:</strong> Just a small detail from the text.</li>
+                    <li>❌ <strong>Too Broad:</strong> Too general, missing the specific topic.</li>
+                    <li>❌ <strong>Incorrect:</strong> A fact that wasn't in the reading!</li>
+                </ul>
+            </div>
+
+            <button onclick="restartPractice()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-full text-2xl shadow-lg transition transform hover:scale-105">
+                Practice Again 🔄
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // --- 15 Reading Passages and Questions ---
+        const quizData = [
+            {
+                passage: "Have you ever taken off your shoes and noticed a terrible smell? You can blame bacteria! Your feet have lots of sweat glands. When your feet get trapped in dark, damp shoes, bacteria go to work. They eat the sweat and dead skin cells on your feet. As they digest this 'food,' the bacteria release stinky gases, which is what hits your nose when you take off your sneakers.",
+                options: [
+                    { type: "perfect", text: "Bacteria eat sweat and dead skin in your dark shoes, creating stinky gases that make feet smell." },
+                    { type: "specific", text: "Your feet have a lot of sweat glands." },
+                    { type: "broad", text: "Shoes can get really smelly sometimes after you wear them." },
+                    { type: "incorrect", text: "The dark color of your shoes causes your feet to sweat and smell bad." }
+                ]
+            },
+            {
+                passage: "Scientists have been searching for signs of life on Mars for decades. To do this, NASA sent robotic rovers, like Curiosity and Perseverance, to explore the red planet. These rovers have cameras and drills to study the Martian soil. They recently found evidence that ancient rivers and lakes once existed there. Because water is necessary for life as we know it, scientists hope they might eventually find tiny fossils of ancient space bacteria.",
+                options: [
+                    { type: "perfect", text: "NASA rovers found evidence of ancient water on Mars, giving scientists hope of finding signs of past life." },
+                    { type: "specific", text: "The rovers on Mars are named Curiosity and Perseverance." },
+                    { type: "broad", text: "Scientists are studying space and looking at different planets." },
+                    { type: "incorrect", text: "Rovers discovered living space bacteria swimming in lakes on Mars." }
+                ]
+            },
+            {
+                passage: "Skateboarding wasn't always the popular sport it is today. Back in the 1950s, surfers in California were bored when the ocean waves were flat. They wanted a way to 'surf' on land. To fix this problem, they took wooden boards and attached roller skate wheels to the bottom. They called it 'sidewalk surfing.' It allowed them to practice their balance and turns on the streets while waiting for the real waves to return.",
+                options: [
+                    { type: "perfect", text: "In the 1950s, California surfers invented skateboards by putting wheels on wooden boards so they could surf on the streets." },
+                    { type: "specific", text: "Surfers originally called the sport 'sidewalk surfing'." },
+                    { type: "broad", text: "People have invented many new sports over the years to stay entertained." },
+                    { type: "incorrect", text: "Skateboarding was invented by roller skaters who wanted to learn how to ride ocean waves." }
+                ]
+            },
+            {
+                passage: "Have you ever wondered how Mario jumps or how a car in a racing game crashes so realistically? Video game programmers use a special type of code called a 'physics engine.' This code uses complex math formulas to simulate real-world rules like gravity, friction, and bounce. Without a physics engine, characters would float into space when they jumped, and objects would pass right through each other like ghosts.",
+                options: [
+                    { type: "perfect", text: "Video game programmers use math inside physics engines to make jumping and crashing look realistic." },
+                    { type: "specific", text: "A physics engine simulates real-world rules like gravity and friction." },
+                    { type: "broad", text: "Video games require a lot of coding to make them work properly." },
+                    { type: "incorrect", text: "Mario jumps realistically because the programmers recorded a real person jumping." }
+                ]
+            },
+            {
+                passage: "The octopus is one of the strangest creatures in the ocean. While humans have one heart and red blood, the octopus has three hearts and blue blood! Two of the hearts pump blood to the octopus's gills, while the third pumps it to the rest of the body. Their blood is blue because it is copper-based instead of iron-based. This special copper blood helps the octopus survive in the freezing temperatures of the deep ocean.",
+                options: [
+                    { type: "perfect", text: "Octopuses have three hearts and blue, copper-based blood that helps them survive in freezing deep ocean waters." },
+                    { type: "specific", text: "Two of an octopus's hearts pump blood only to its gills." },
+                    { type: "broad", text: "There are many strange and unique animals living in the ocean." },
+                    { type: "incorrect", text: "Octopuses have red blood because of the iron they eat in the deep ocean." }
+                ]
+            },
+            {
+                passage: "Hundreds of years ago, the ancient Chinese emperors ordered the construction of a massive barrier. Millions of workers spent generations building walls out of stone, brick, and packed dirt. Today, we call this the Great Wall of China. It stretches for thousands of miles across mountains and deserts. The main reason the wall was built was to protect the Chinese Empire from dangerous invaders attacking from the north.",
+                options: [
+                    { type: "perfect", text: "Ancient Chinese emperors had millions of workers build the Great Wall to protect their empire from northern invaders." },
+                    { type: "specific", text: "The Great Wall of China is made out of stone, brick, and packed dirt." },
+                    { type: "broad", text: "People built large walls a long time ago." },
+                    { type: "incorrect", text: "The Great Wall was built by northern invaders to trap the Chinese emperors in the mountains." }
+                ]
+            },
+            {
+                passage: "When you think of chocolate, you probably picture a sweet, solid candy bar. However, for most of history, chocolate was a bitter drink. The ancient Maya and Aztec people of Central America roasted cacao beans and mixed them with water, chili peppers, and spices. They called it 'xocolatl.' They believed this spicy, bitter drink was a gift from the gods that gave them special energy and strength.",
+                options: [
+                    { type: "perfect", text: "Ancient Maya and Aztec people drank a bitter, spicy cacao drink because they believed it gave them strength from the gods." },
+                    { type: "specific", text: "The ancient Maya and Aztec people mixed cacao beans with chili peppers." },
+                    { type: "broad", text: "Chocolate has changed a lot from how it was made in the past." },
+                    { type: "incorrect", text: "The Aztecs invented the first sweet, solid chocolate candy bar." }
+                ]
+            },
+            {
+                passage: "Black holes are some of the most mysterious objects in space. They form when massive stars run out of fuel and collapse in on themselves. This collapse creates an area where gravity is unimaginably strong. The gravitational pull is so intense that nothing, not even light, can move fast enough to escape it. Because no light can escape, black holes are completely invisible to human eyes.",
+                options: [
+                    { type: "perfect", text: "When massive stars collapse, they create black holes with gravity so strong that not even light can escape." },
+                    { type: "specific", text: "Black holes form when massive stars run out of fuel." },
+                    { type: "broad", text: "Space is full of massive stars and mysterious, invisible objects." },
+                    { type: "incorrect", text: "Black holes are very bright objects that pull in light from stars." }
+                ]
+            },
+            {
+                passage: "Honeybees have a secret language, but they don't use words; they use dance! When a scout bee finds a great patch of flowers, she flies back to the hive to tell her friends. She performs a special wiggling walk called the 'waggle dance.' The angle of her dance tells the other bees which direction to fly, and how long she waggles tells them how far away the flowers are. This clever communication helps the whole hive find food.",
+                options: [
+                    { type: "perfect", text: "Scout honeybees perform a 'waggle dance' to show the rest of the hive the exact direction and distance of flowers." },
+                    { type: "specific", text: "The length of the honeybee's waggle tells the other bees how far away the flowers are." },
+                    { type: "broad", text: "Animals and insects have interesting ways of communicating with each other." },
+                    { type: "incorrect", text: "Honeybees dance to scare away predators from their flower patches." }
+                ]
+            },
+            {
+                passage: "The ancient Egyptians believed very strongly in life after death. They thought that a person's spirit would need its physical body in the afterlife. Because of this, they developed a complex process called mummification to stop dead bodies from rotting. Priests would remove the internal organs, dry the body out with special salts, and wrap it tightly in linen bandages before placing it in a tomb.",
+                options: [
+                    { type: "perfect", text: "Ancient Egyptians used the mummification process to preserve bodies because they believed the spirit needed it for the afterlife." },
+                    { type: "specific", text: "Priests would dry the dead body out with special salts and wrap it in linen." },
+                    { type: "broad", text: "The ancient Egyptians had many beliefs about death and spirits." },
+                    { type: "incorrect", text: "Mummification was used to bring people back to life using special salts." }
+                ]
+            },
+            {
+                passage: "In the year 79 AD, the towering volcano Mount Vesuvius suddenly erupted in Italy. A massive cloud of superheated ash and rock blasted into the sky and rained down on the nearby city of Pompeii. The city and its people were buried under millions of tons of ash in just hours. Though it was a tragedy, the thick ash acted like a time capsule, perfectly preserving the buildings, art, and streets of Pompeii for archaeologists to discover centuries later.",
+                options: [
+                    { type: "perfect", text: "When Mount Vesuvius erupted in 79 AD, its ash completely buried the city of Pompeii, perfectly preserving it for history." },
+                    { type: "specific", text: "Mount Vesuvius is a towering volcano located in Italy." },
+                    { type: "broad", text: "Volcano eruptions can cause a lot of damage to cities and towns." },
+                    { type: "incorrect", text: "Archaeologists buried Pompeii in ash to protect the art from a volcano." }
+                ]
+            },
+            {
+                passage: "You might think your brain completely turns off when you go to sleep, but it's actually incredibly busy. While you snooze, your brain acts like a librarian. It sorts through all the experiences and information you gathered during the day. It throws away useless details and stores the important stuff into your long-term memory. Without enough sleep, your brain can't do this sorting work, making it very hard to learn new things.",
+                options: [
+                    { type: "perfect", text: "While you sleep, your brain works hard sorting your daily experiences into memories so you can learn." },
+                    { type: "specific", text: "Your brain throws away useless details while you are asleep." },
+                    { type: "broad", text: "Sleep is really important for your health and your brain." },
+                    { type: "incorrect", text: "Your brain completely turns off and stops working when you go to sleep." }
+                ]
+            },
+            {
+                passage: "The anglerfish lives deep at the bottom of the ocean where no sunlight can reach. Finding food in total darkness is tough, so the anglerfish uses a neat trick. It has a long stalk sticking out of its head with a glowing ball of light on the end. This glowing light attracts curious smaller fish. When the little fish swim close to investigate the light, the anglerfish snaps its huge jaws shut and eats them!",
+                options: [
+                    { type: "perfect", text: "The anglerfish uses a glowing stalk on its head to attract and eat curious fish in the dark ocean." },
+                    { type: "specific", text: "The anglerfish lives deep at the bottom of the ocean where there is no sunlight." },
+                    { type: "broad", text: "Ocean animals have to find clever ways to catch their food." },
+                    { type: "incorrect", text: "Anglerfish glow in the dark to scare away predators that try to eat them." }
+                ]
+            },
+            {
+                passage: "When you ride a rollercoaster, you might notice there is no engine making the train move. So how does it go so fast? Rollercoasters rely on energy and gravity. A motor pulls the train up the very first, tallest hill, building up 'potential energy.' When the train drops over the top, gravity takes over. The potential energy turns into 'kinetic energy' (motion), which gives the train enough speed to blast through all the loops and hills that follow.",
+                options: [
+                    { type: "perfect", text: "Rollercoasters don't have engines; instead, they use gravity and changing energy to power through the tracks." },
+                    { type: "specific", text: "A motor pulls the train up the first hill to build potential energy." },
+                    { type: "broad", text: "Rollercoasters are fast, fun rides that go up and down large hills." },
+                    { type: "incorrect", text: "Rollercoasters have large engines hidden under the train that push them up hills." }
+                ]
+            },
+            {
+                passage: "Tardigrades, also known as 'water bears,' are microscopic animals that look like eight-legged gummy bears. Even though they are tiny, they are nearly indestructible! If their environment gets too hot, freezing cold, or completely dries up, a tardigrade rolls into a little ball and pauses its life processes. They can survive in this state for decades. Scientists have even sent them into outer space, and the water bears survived the harsh radiation and lack of oxygen!",
+                options: [
+                    { type: "perfect", text: "Tardigrades are tiny, eight-legged animals that survive extreme conditions by rolling up and pausing their life processes." },
+                    { type: "specific", text: "Scientists have sent tardigrades into outer space." },
+                    { type: "broad", text: "There are many small organisms that live in the water." },
+                    { type: "incorrect", text: "Tardigrades are giant bears that live in the freezing cold and never need oxygen." }
+                ]
+            }
+        ];
+
+        // --- App State ---
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answered = false;
+
+        // --- DOM Elements ---
+        const introScreen = document.getElementById('intro-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        
+        const passageText = document.getElementById('passage-text');
+        const optionsContainer = document.getElementById('options-container');
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackIcon = document.getElementById('feedback-icon');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackText = document.getElementById('feedback-text');
+        const nextBtn = document.getElementById('next-btn');
+
+        // --- Functions ---
+
+        function startPractice() {
+            introScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            quizScreen.classList.add('flex');
+            loadQuestion();
+        }
+
+        function shuffleArray(array) {
+            // Fisher-Yates shuffle
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function loadQuestion() {
+            // Reset state
+            answered = false;
+            feedbackArea.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            
+            // Get current question
+            const q = quizData[currentQuestionIndex];
+            
+            // Update UI
+            progressText.innerText = `Question ${currentQuestionIndex + 1} of ${quizData.length}`;
+            progressFill.style.width = `${((currentQuestionIndex) / quizData.length) * 100}%`;
+            passageText.innerText = q.passage;
+
+            // Clear old options
+            optionsContainer.innerHTML = '';
+
+            // Shuffle options
+            const shuffledOptions = shuffleArray([...q.options]);
+
+            // Render options
+            shuffledOptions.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn w-full text-left p-4 rounded-xl border-2 border-gray-300 bg-white hover:bg-blue-50 text-gray-700 font-medium text-lg';
+                btn.innerHTML = `<span class="font-bold mr-2">${String.fromCharCode(65 + index)}.</span> ${opt.text}`;
+                btn.onclick = () => selectOption(btn, opt);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function getFeedbackMessage(type) {
+            switch(type) {
+                case 'perfect': return "Great job! This is the perfect one-sentence summary that covers the Who, What, and Why/How.";
+                case 'specific': return "That's a true fact, but it's TOO SPECIFIC! A GIST needs to cover the whole paragraph, not just one small detail.";
+                case 'broad': return "TOO BROAD! This sentence is so general that it could be about a hundred different paragraphs. It misses the specific topic.";
+                case 'incorrect': return "INCORRECT! This fact wasn't in the text, or it actually goes against what the text said.";
+                default: return "";
+            }
+        }
+
+        function selectOption(selectedBtn, optionData) {
+            if (answered) return; // Prevent multiple clicks
+            answered = true;
+
+            const isCorrect = optionData.type === 'perfect';
+            if (isCorrect) score++;
+
+            // Style all buttons based on correctness
+            const allBtns = optionsContainer.children;
+            for (let btn of allBtns) {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-blue-50', 'border-gray-300');
+                
+                // Find the perfect answer to highlight it anyway
+                const btnText = btn.innerText.substring(3); // Remove "A. "
+                const isThisBtnPerfect = quizData[currentQuestionIndex].options.find(o => o.type === 'perfect').text === btnText;
+
+                if (btn === selectedBtn) {
+                    if (isCorrect) {
+                        btn.classList.add('bg-green-100', 'border-green-500', 'text-green-800');
+                    } else {
+                        btn.classList.add('bg-red-100', 'border-red-500', 'text-red-800');
+                    }
+                } else if (isThisBtnPerfect) {
+                    // Highlight the correct answer if they got it wrong
+                    btn.classList.add('border-green-400', 'text-green-700', 'border-dashed');
+                } else {
+                    btn.classList.add('opacity-50', 'bg-gray-50');
+                }
+            }
+
+            // Show feedback
+            feedbackArea.classList.remove('hidden', 'bg-green-50', 'bg-red-50', 'border-green-400', 'border-red-400', 'text-green-800', 'text-red-800');
+            
+            if (isCorrect) {
+                feedbackArea.classList.add('bg-green-50', 'border-green-400', 'text-green-800');
+                feedbackIcon.innerText = "✅";
+                feedbackTitle.innerText = "Perfect GIST!";
+            } else {
+                feedbackArea.classList.add('bg-red-50', 'border-red-400', 'text-red-800');
+                feedbackIcon.innerText = "🛑";
+                
+                if (optionData.type === 'specific') feedbackTitle.innerText = "Too Specific!";
+                if (optionData.type === 'broad') feedbackTitle.innerText = "Too Broad!";
+                if (optionData.type === 'incorrect') feedbackTitle.innerText = "Incorrect Fact!";
+            }
+
+            feedbackText.innerText = getFeedbackMessage(optionData.type);
+            
+            // Show Next Button
+            nextBtn.classList.remove('hidden');
+            
+            // Change button text if it's the last question
+            if (currentQuestionIndex === quizData.length - 1) {
+                nextBtn.innerText = "See Results 🏆";
+                progressFill.style.width = '100%';
+            }
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            quizScreen.classList.remove('flex');
+            resultsScreen.classList.remove('hidden');
+            
+            document.getElementById('score-text').innerText = `${score} out of ${quizData.length}`;
+        }
+
+        function restartPractice() {
+            currentQuestionIndex = 0;
+            score = 0;
+            resultsScreen.classList.add('hidden');
+            startPractice();
+        }
+
+    </script>
+</body>
+</html>
