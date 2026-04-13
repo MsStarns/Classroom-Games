@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summary Builder Practice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f3ff; /* Light purple background */
+            color: #334155;
+            font-size: 18px; 
+            line-height: 1.6;
+        }
+
+        .puzzle-icon {
+            font-size: 3rem;
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        .option-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .option-btn:hover:not(:disabled) {
+            transform: translateX(4px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .passage {
+            font-size: 1.125rem; 
+            background-color: #ffffff; 
+            border-left: 6px solid #8b5cf6; /* Purple border */
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .starter-box {
+            background-color: #ede9fe;
+            border: 2px dashed #8b5cf6;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            color: #5b21b6;
+            margin-bottom: 1rem;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
+
+    <div class="w-full max-w-3xl bg-white rounded-2xl shadow-xl overflow-hidden relative fade-in" id="app-container">
+        
+        <div id="intro-screen" class="p-8 text-center">
+            <div class="puzzle-icon">🧩</div>
+            <h1 class="text-4xl font-extrabold text-purple-800 mb-4">Summary Builder</h1>
+            
+            <div class="text-left text-xl bg-purple-50 p-6 rounded-xl mb-8 space-y-4 shadow-sm border border-purple-100">
+                <p><strong>Time to build a perfect summary!</strong></p>
+                <p>Sometimes, getting a summary started is the hardest part. In this practice, we will give you the <strong>Summary Starter</strong>.</p>
+                <p>Your job is to pick the best ending to finish the sentence. Remember, a great summary ending should:</p>
+                <ul class="list-disc list-inside font-bold text-purple-700 pl-4">
+                    <li>Finish the main idea of the paragraph.</li>
+                    <li>Avoid being too specific (just a tiny detail).</li>
+                    <li>Avoid being too broad (too general).</li>
+                </ul>
+            </div>
+
+            <button onclick="startPractice()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-10 rounded-full text-2xl shadow-lg transition transform hover:scale-105 active:scale-95">
+                Start Building! 🏗️
+            </button>
+        </div>
+
+        <div id="quiz-screen" class="hidden flex-col h-full">
+            <div class="bg-purple-700 p-4 text-white flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl">🧩</span>
+                    <span class="font-bold text-xl">Summary Builder</span>
+                </div>
+                <div class="font-bold text-lg" id="progress-text">Question 1 of 10</div>
+            </div>
+            
+            <div class="w-full bg-purple-200 h-2">
+                <div id="progress-fill" class="bg-green-400 h-2 transition-all duration-300" style="width: 0%;"></div>
+            </div>
+
+            <div class="p-6 md:p-8 flex-grow fade-in" id="question-content">
+                <div class="passage" id="passage-text">
+                    </div>
+
+                <div class="starter-box">
+                    <span class="text-sm uppercase text-purple-500 tracking-wider block mb-1">Summary Starter:</span>
+                    <span id="starter-text" class="text-xl"></span>
+                </div>
+                
+                <h3 class="text-lg font-bold mb-3 text-gray-600">Choose the best ending to complete the summary:</h3>
+
+                <div class="space-y-3" id="options-container">
+                    </div>
+
+                <div id="feedback-area" class="mt-6 p-4 rounded-lg hidden text-lg border-2">
+                    <div class="flex items-start">
+                        <span id="feedback-icon" class="text-3xl mr-3"></span>
+                        <div>
+                            <h4 id="feedback-title" class="font-bold text-xl mb-1"></h4>
+                            <p id="feedback-text"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-end">
+                    <button id="next-btn" onclick="nextQuestion()" class="hidden bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full text-xl shadow-md transition transform hover:scale-105">
+                        Next Paragraph ➡️
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="results-screen" class="hidden p-8 text-center fade-in">
+            <h2 class="text-4xl font-extrabold text-purple-800 mb-6">Building Complete! 🎉</h2>
+            <div class="text-2xl mb-8">
+                You built the perfect summary <span id="score-text" class="font-bold text-green-600 text-4xl"></span> times!
+            </div>
+            
+            <div class="bg-gray-100 p-6 rounded-xl mb-8 text-left text-lg max-w-lg mx-auto shadow-inner border-l-4 border-purple-500">
+                <h3 class="font-bold text-xl mb-2">Great job!</h3>
+                <p>You practiced how to take a sentence starter and finish it with the most important information. Next time you write your own summary, try creating your own starters!</p>
+            </div>
+
+            <button onclick="restartPractice()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-10 rounded-full text-2xl shadow-lg transition transform hover:scale-105">
+                Practice Again 🔄
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 10 Reading Passages with Starters and Continuations ---
+        const quizData = [
+            {
+                passage: "Fireflies light up the summer night using a special chemical reaction in their bodies called bioluminescence. They don't just glow for fun, though! They blink their lights in very specific patterns to communicate with other fireflies. This blinking helps them find a mate or warn off predators.",
+                starter: "Fireflies use a chemical reaction to create light so they can...",
+                options: [
+                    { type: "perfect", text: "...communicate with each other to find mates and warn off predators." },
+                    { type: "specific", text: "...make a chemical reaction called bioluminescence in their bodies." },
+                    { type: "broad", text: "...do interesting things outside during the summer nights." },
+                    { type: "incorrect", text: "...see where they are flying in the dark and find food to eat." }
+                ]
+            },
+            {
+                passage: "The water on Earth today is the exact same water that has been here for billions of years. It moves in a continuous cycle. The sun heats up water in oceans and rivers, turning it into an invisible gas called vapor. The vapor rises, cools into clouds, and eventually falls back down as rain or snow.",
+                starter: "Driven by the heat of the sun, Earth's water...",
+                options: [
+                    { type: "perfect", text: "...constantly moves through a cycle of evaporating, forming clouds, and falling as rain." },
+                    { type: "specific", text: "...turns into an invisible gas called vapor when it gets hot." },
+                    { type: "broad", text: "...has been on the planet for billions of years." },
+                    { type: "incorrect", text: "...is slowly disappearing into space as it turns into clouds." }
+                ]
+            },
+            {
+                passage: "In 1955, Rosa Parks was riding a bus in Montgomery, Alabama. At that time, unfair laws stated that Black people had to sit in the back of the bus and give up their seats to white passengers. When Rosa bravely refused to give up her seat, she was arrested. This sparked a massive city-wide bus boycott that helped change civil rights laws in America.",
+                starter: "By bravely refusing to give up her seat on a segregated bus, Rosa Parks...",
+                options: [
+                    { type: "perfect", text: "...sparked a major boycott that helped change unfair civil rights laws in America." },
+                    { type: "specific", text: "...was riding on a bus in Montgomery, Alabama in the year 1955." },
+                    { type: "broad", text: "...did something very important for history." },
+                    { type: "incorrect", text: "...convinced the bus driver to let everyone ride the bus for free." }
+                ]
+            },
+            {
+                passage: "Camels are perfectly adapted to harsh desert life. They have long eyelashes to keep out blowing sand and wide, padded feet to stop them from sinking into the dunes. Most importantly, their humps store thick fat. When food and water are scarce in the hot desert, their bodies can convert that fat into energy and hydration.",
+                starter: "To survive in the harsh desert environment, camels have special adaptations like...",
+                options: [
+                    { type: "perfect", text: "...long eyelashes, wide feet, and humps that store fat for energy and water." },
+                    { type: "specific", text: "...wide, padded feet to stop them from sinking into the dunes." },
+                    { type: "broad", text: "...bodies that are built differently from other animals." },
+                    { type: "incorrect", text: "...humps that are filled with gallons of extra drinking water." }
+                ]
+            },
+            {
+                passage: "In 1969, the Apollo 11 mission made history when astronauts Neil Armstrong and Buzz Aldrin became the first humans to walk on the moon. Millions of people watched in awe on live television. As Armstrong took his famous first steps onto the dusty lunar surface, he said, 'That's one small step for man, one giant leap for mankind.'",
+                starter: "In 1969, the Apollo 11 mission made history when it...",
+                options: [
+                    { type: "perfect", text: "...successfully landed the first humans on the moon for the whole world to see." },
+                    { type: "specific", text: "...allowed Neil Armstrong to say his famous quote about taking a small step." },
+                    { type: "broad", text: "...went up into space and did something amazing." },
+                    { type: "incorrect", text: "...discovered alien life living on the dusty lunar surface." }
+                ]
+            },
+            {
+                passage: "The Earth's outer crust isn't one solid piece of rock; it is made of giant puzzle pieces called tectonic plates. These plates are always slowly shifting and moving. Sometimes, the rough edges of the plates get stuck against each other. When they finally break free, the sudden release of built-up energy violently shakes the ground, causing an earthquake.",
+                starter: "Earthquakes happen when giant puzzle pieces of the Earth's crust called tectonic plates...",
+                options: [
+                    { type: "perfect", text: "...get stuck and suddenly break free, releasing energy that shakes the ground." },
+                    { type: "specific", text: "...are always slowly shifting and moving around." },
+                    { type: "broad", text: "...move around underneath the ground we walk on." },
+                    { type: "incorrect", text: "...crash into underground volcanoes and cause them to explode." }
+                ]
+            },
+            {
+                passage: "Decades before we had smartphones and Wi-Fi, the internet started in the 1960s as a secret government project called ARPANET. It was originally designed to let military computers safely communicate with each other during emergencies. Eventually, scientists expanded the network, and it grew into the public internet that connects the entire world today.",
+                starter: "Although it connects the whole world today, the internet originally started as...",
+                options: [
+                    { type: "perfect", text: "...a secret government project designed for military computers to communicate." },
+                    { type: "specific", text: "...a project in the 1960s called ARPANET." },
+                    { type: "broad", text: "...something very different than what we use on our smartphones." },
+                    { type: "incorrect", text: "...a way for scientists to play video games on their smartphones." }
+                ]
+            },
+            {
+                passage: "Sloths are famous for being some of the slowest mammals on Earth. They live high in the canopy of the rainforest and move at a snail's pace. While this seems lazy, it actually helps them survive! Moving slowly saves them precious energy, and it makes them almost invisible to predators like eagles and jaguars, who look for quick, sudden movements.",
+                starter: "Sloths move incredibly slowly through the rainforest canopy in order to...",
+                options: [
+                    { type: "perfect", text: "...save their energy and stay hidden from sharp-eyed predators." },
+                    { type: "specific", text: "...hide from eagles and jaguars." },
+                    { type: "broad", text: "...live their lives high up in the trees." },
+                    { type: "incorrect", text: "...make sure they don't fall out of the tall trees." }
+                ]
+            },
+            {
+                passage: "In ancient Egypt, pharaohs were considered both kings and gods. When a pharaoh died, the Egyptians believed his spirit needed a home and items for the afterlife. To provide this, they built massive, triangle-shaped stone tombs called pyramids. Inside these giant structures, they placed the pharaoh's mummy along with gold, furniture, and food.",
+                starter: "The ancient Egyptians built massive pyramids to...",
+                options: [
+                    { type: "perfect", text: "...serve as grand tombs that held a pharaoh's body and treasures for the afterlife." },
+                    { type: "specific", text: "...hold the pharaoh's gold, furniture, and food." },
+                    { type: "broad", text: "...build large triangle structures out of stone." },
+                    { type: "incorrect", text: "...provide homes for the pharaohs to live in while they were still alive." }
+                ]
+            },
+            {
+                passage: "Many bakers use yeast to make their bread light and fluffy. Yeast is actually a tiny, single-celled living fungus! When yeast is mixed into bread dough, it eats the sugars in the flour. As it eats, it burps out carbon dioxide gas. These gas bubbles get trapped in the sticky dough, causing the bread to rise and puff up before it is baked.",
+                starter: "Bakers use a living fungus called yeast in their dough because it...",
+                options: [
+                    { type: "perfect", text: "...eats sugar and releases gas bubbles that cause the bread to rise and become fluffy." },
+                    { type: "specific", text: "...is a tiny, single-celled living organism." },
+                    { type: "broad", text: "...makes baking food much better." },
+                    { type: "incorrect", text: "...absorbs the carbon dioxide gas from the air to make the dough sticky." }
+                ]
+            }
+        ];
+
+        // --- App State ---
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answered = false;
+
+        // --- DOM Elements ---
+        const introScreen = document.getElementById('intro-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        
+        const passageText = document.getElementById('passage-text');
+        const starterText = document.getElementById('starter-text');
+        const optionsContainer = document.getElementById('options-container');
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackIcon = document.getElementById('feedback-icon');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackText = document.getElementById('feedback-text');
+        const nextBtn = document.getElementById('next-btn');
+
+        // --- Functions ---
+
+        function startPractice() {
+            introScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            quizScreen.classList.add('flex');
+            loadQuestion();
+        }
+
+        function shuffleArray(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function loadQuestion() {
+            // Reset state
+            answered = false;
+            feedbackArea.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            
+            // Get current question
+            const q = quizData[currentQuestionIndex];
+            
+            // Update UI
+            progressText.innerText = `Question ${currentQuestionIndex + 1} of ${quizData.length}`;
+            progressFill.style.width = `${((currentQuestionIndex) / quizData.length) * 100}%`;
+            passageText.innerText = q.passage;
+            starterText.innerText = q.starter;
+
+            // Clear old options
+            optionsContainer.innerHTML = '';
+
+            // Shuffle options
+            const shuffledOptions = shuffleArray([...q.options]);
+
+            // Render options
+            shuffledOptions.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn w-full text-left p-4 rounded-xl border-2 border-gray-300 bg-white hover:bg-purple-50 text-gray-700 font-medium text-lg';
+                btn.innerHTML = opt.text;
+                btn.onclick = () => selectOption(btn, opt);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function getFeedbackMessage(type) {
+            switch(type) {
+                case 'perfect': return "Awesome! You completed the sentence perfectly with the most important ideas.";
+                case 'specific': return "That's true, but it's TOO SPECIFIC! This ending only talks about a tiny detail, not the whole main idea.";
+                case 'broad': return "TOO BROAD! This ending is way too general. It doesn't give us the specific facts we need for a good summary.";
+                case 'incorrect': return "INCORRECT! That fact wasn't in the paragraph, or it's not quite right.";
+                default: return "";
+            }
+        }
+
+        function selectOption(selectedBtn, optionData) {
+            if (answered) return; 
+            answered = true;
+
+            const isCorrect = optionData.type === 'perfect';
+            if (isCorrect) score++;
+
+            // Style all buttons
+            const allBtns = optionsContainer.children;
+            for (let btn of allBtns) {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-purple-50', 'border-gray-300');
+                
+                const isThisBtnPerfect = quizData[currentQuestionIndex].options.find(o => o.type === 'perfect').text === btn.innerText;
+
+                if (btn === selectedBtn) {
+                    if (isCorrect) {
+                        btn.classList.add('bg-green-100', 'border-green-500', 'text-green-800');
+                    } else {
+                        btn.classList.add('bg-red-100', 'border-red-500', 'text-red-800');
+                    }
+                } else if (isThisBtnPerfect) {
+                    btn.classList.add('border-green-400', 'text-green-700', 'border-dashed');
+                } else {
+                    btn.classList.add('opacity-50', 'bg-gray-50');
+                }
+            }
+
+            // Show feedback
+            feedbackArea.classList.remove('hidden', 'bg-green-50', 'bg-red-50', 'border-green-400', 'border-red-400', 'text-green-800', 'text-red-800');
+            
+            if (isCorrect) {
+                feedbackArea.classList.add('bg-green-50', 'border-green-400', 'text-green-800');
+                feedbackIcon.innerText = "✅";
+                feedbackTitle.innerText = "Perfect Ending!";
+            } else {
+                feedbackArea.classList.add('bg-red-50', 'border-red-400', 'text-red-800');
+                feedbackIcon.innerText = "🛑";
+                
+                if (optionData.type === 'specific') feedbackTitle.innerText = "Too Specific!";
+                if (optionData.type === 'broad') feedbackTitle.innerText = "Too Broad!";
+                if (optionData.type === 'incorrect') feedbackTitle.innerText = "Incorrect Fact!";
+            }
+
+            feedbackText.innerText = getFeedbackMessage(optionData.type);
+            
+            nextBtn.classList.remove('hidden');
+            
+            if (currentQuestionIndex === quizData.length - 1) {
+                nextBtn.innerText = "See Results 🏆";
+                progressFill.style.width = '100%';
+            }
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            quizScreen.classList.remove('flex');
+            resultsScreen.classList.remove('hidden');
+            
+            document.getElementById('score-text').innerText = `${score} out of ${quizData.length}`;
+        }
+
+        function restartPractice() {
+            currentQuestionIndex = 0;
+            score = 0;
+            resultsScreen.classList.add('hidden');
+            startPractice();
+        }
+
+    </script>
+</body>
+</html>
