@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stop and GIST! Reading Practice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Base styles for kid-friendly typography */
+        body {
+            font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f9ff;
+            color: #334155;
+            font-size: 18px; /* Requirement: At least 18px */
+            line-height: 1.6;
+        }
+
+        /* Stop Sign CSS Shape */
+        .stop-sign {
+            width: 140px;
+            height: 140px;
+            background-color: #ef4444; /* Tailwind red-500 */
+            clip-path: polygon(29% 0, 71% 0, 100% 29%, 100% 71%, 71% 100%, 29% 100%, 0 71%, 0 29%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .stop-sign-inner {
+            width: 124px;
+            height: 124px;
+            border: 4px solid white;
+            clip-path: polygon(29% 0, 71% 0, 100% 29%, 100% 71%, 71% 100%, 29% 100%, 0 71%, 0 29%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-align: center;
+            line-height: 1.1;
+        }
+
+        .stop-text { font-size: 26px; }
+        .gist-text { font-size: 16px; }
+
+        /* Custom Button Transitions */
+        .option-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Reading Passage styling */
+        .passage {
+            font-size: 1.125rem; /* 18px */
+            background-color: #fffbeb; /* Light yellow to look like a reading card */
+            border-left: 6px solid #fbbf24;
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Fade in animation */
+        .fade-in {
+            animation: fadeIn 0.4s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
+
+    <div class="w-full max-w-3xl bg-white rounded-2xl shadow-xl overflow-hidden relative fade-in" id="app-container">
+        
+        <div id="intro-screen" class="p-8 text-center">
+            <div class="stop-sign mb-6">
+                <div class="stop-sign-inner">
+                    <span class="stop-text">STOP</span>
+                    <span class="gist-text">& GIST</span>
+                </div>
+            </div>
+            
+            <h1 class="text-4xl font-extrabold text-blue-800 mb-4">Reading for GIST</h1>
+            
+            <div class="text-left text-xl bg-blue-50 p-6 rounded-xl mb-8 space-y-4 shadow-sm border border-blue-100">
+                <p><strong>What is a GIST?</strong></p>
+                <p>A GIST is a <strong>one-sentence summary</strong> that answers the most important questions about what you just read:</p>
+                <ul class="list-disc list-inside font-bold text-blue-600 pl-4">
+                    <li>Who?</li>
+                    <li>What?</li>
+                    <li>When? / Where?</li>
+                    <li>Why? / How?</li>
+                </ul>
+                <p class="mt-4 border-t border-blue-200 pt-4">
+                    🚦 Good readers know they need to <strong>"Stop and GIST."</strong> After a big paragraph, pause like you are at a Stop Sign. Ask yourself: <em>"What was that mostly about?"</em>
+                </p>
+            </div>
+
+            <button onclick="startPractice()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-full text-2xl shadow-lg transition transform hover:scale-105 active:scale-95">
+                Start Practice! 🚀
+            </button>
+        </div>
+
+        <div id="quiz-screen" class="hidden flex-col h-full">
+            <div class="bg-blue-600 p-4 text-white flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="stop-sign" style="width: 40px; height: 40px;">
+                        <div class="stop-sign-inner" style="width: 34px; height: 34px; border-width: 2px;">
+                            <span style="font-size: 8px;">STOP</span>
+                        </div>
+                    </div>
+                    <span class="font-bold text-xl">Stop & GIST</span>
+                </div>
+                <div class="font-bold text-lg" id="progress-text">Question 1 of 15</div>
+            </div>
+            
+            <div class="w-full bg-blue-200 h-2">
+                <div id="progress-fill" class="bg-yellow-400 h-2 transition-all duration-300" style="width: 0%;"></div>
+            </div>
+
+            <div class="p-6 md:p-8 flex-grow fade-in" id="question-content">
+                <div class="passage shadow-sm" id="passage-text">
+                    </div>
+
+                <h3 class="text-xl font-bold mb-4 text-gray-700">Which sentence is the perfect GIST?</h3>
+                
+                <div class="space-y-3" id="options-container">
+                    </div>
+
+                <div id="feedback-area" class="mt-6 p-4 rounded-lg hidden text-lg border-2">
+                    <div class="flex items-start">
+                        <span id="feedback-icon" class="text-3xl mr-3"></span>
+                        <div>
+                            <h4 id="feedback-title" class="font-bold text-xl mb-1"></h4>
+                            <p id="feedback-text"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-end">
+                    <button id="next-btn" onclick="nextQuestion()" class="hidden bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full text-xl shadow-md transition transform hover:scale-105">
+                        Next Paragraph ➡️
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="results-screen" class="hidden p-8 text-center fade-in">
+            <h2 class="text-4xl font-extrabold text-blue-800 mb-6">Practice Complete! 🎉</h2>
+            <div class="text-2xl mb-8">
+                You found the perfect GIST <span id="score-text" class="font-bold text-green-600 text-4xl"></span> times!
+            </div>
+            
+            <div class="bg-gray-100 p-6 rounded-xl mb-8 text-left text-lg max-w-lg mx-auto shadow-inner">
+                <h3 class="font-bold text-xl mb-2 text-center">Remember the GIST rules:</h3>
+                <ul class="space-y-2">
+                    <li>✅ <strong>Perfect GIST:</strong> Covers the big Who, What, and Why.</li>
+                    <li>❌ <strong>Too Specific:</strong> Just a small detail from the text.</li>
+                    <li>❌ <strong>Too Broad:</strong> Too general, missing the specific topic.</li>
+                    <li>❌ <strong>Incorrect:</strong> A fact that wasn't in the reading!</li>
+                </ul>
+            </div>
+
+            <button onclick="restartPractice()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-full text-2xl shadow-lg transition transform hover:scale-105">
+                Practice Again 🔄
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 15 New Reading Passages and Questions ---
+        const quizData = [
+            {
+                passage: "Venus flytraps are fascinating carnivorous plants that grow in poor, boggy soil. Because the soil lacks important nutrients, they have to get them by trapping bugs. When a curious insect lands and touches the tiny trigger hairs inside the leaf, the plant quickly snaps shut, trapping the bug inside to be digested.",
+                options: [
+                    { type: "perfect", text: "Venus flytraps are carnivorous plants that snap shut to trap and digest bugs because their soil lacks nutrients." },
+                    { type: "specific", text: "A Venus flytrap snaps shut when an insect touches its tiny trigger hairs." },
+                    { type: "broad", text: "Some plants are carnivorous and eat insects to survive." },
+                    { type: "incorrect", text: "Venus flytraps eat bugs because they hate sunlight and need bugs for energy." }
+                ]
+            },
+            {
+                passage: "Orville and Wilbur Wright were brothers who invented the world's first successful airplane. They started off building and fixing bicycles, which helped them understand the mechanics of balance and steering. Using this knowledge, they built a powered glider and successfully flew it for 12 seconds in 1903 in Kitty Hawk, North Carolina.",
+                options: [
+                    { type: "perfect", text: "The Wright brothers used their knowledge of bicycles to invent and fly the first successful powered airplane in 1903." },
+                    { type: "specific", text: "The very first successful airplane flight only lasted for 12 seconds." },
+                    { type: "broad", text: "Many people throughout history have invented different ways to travel through the air." },
+                    { type: "incorrect", text: "The Wright brothers invented the first airplane by copying exactly how birds flap their wings." }
+                ]
+            },
+            {
+                passage: "Many people think chameleons change color to blend in with their surroundings so predators can't see them, but that's a myth! Chameleons actually change color based on their mood, the temperature, and to communicate. A dark color might mean they are cold or angry, while bright colors might mean they are trying to attract a mate.",
+                options: [
+                    { type: "perfect", text: "Chameleons change their skin color to show their mood, control their temperature, and communicate, not to blend in." },
+                    { type: "specific", text: "A dark color can mean a chameleon is feeling very cold or angry." },
+                    { type: "broad", text: "Reptiles have many unique and interesting ways of surviving in the wild." },
+                    { type: "incorrect", text: "Chameleons change color so they can perfectly match the tree branch they are sitting on." }
+                ]
+            },
+            {
+                passage: "The Mariana Trench is the deepest part of the ocean, located far out in the Pacific. It is so incredibly deep that if you dropped Mount Everest inside, its peak would still be completely underwater! Despite the freezing temperatures and crushing water pressure, scientists have discovered strange, glowing creatures living all the way at the bottom.",
+                options: [
+                    { type: "perfect", text: "The Mariana Trench is the deepest part of the ocean where strange creatures live despite the freezing cold and extreme pressure." },
+                    { type: "specific", text: "If you put Mount Everest in the Mariana Trench, it would be entirely covered by water." },
+                    { type: "broad", text: "The ocean is a very large place full of mysterious and hidden areas." },
+                    { type: "incorrect", text: "No living creatures can survive in the Mariana Trench because it is way too deep and cold." }
+                ]
+            },
+            {
+                passage: "Bats are actually not blind, but they hunt at night when it's extremely hard to see. To find their prey in the dark, bats use a trick called echolocation. They make high-pitched squeaks that bounce off objects like insects or trees. The echo bounces back to the bat's sensitive ears, creating a mental map of what is around them.",
+                options: [
+                    { type: "perfect", text: "Bats use echolocation, which involves bouncing sound off objects, to create a mental map so they can hunt at night." },
+                    { type: "specific", text: "Bats make high-pitched squeaks that bounce off objects like trees and insects." },
+                    { type: "broad", text: "Animals use many different senses to find food when it gets dark outside." },
+                    { type: "incorrect", text: "Bats use echolocation because they are completely blind and cannot see daylight." }
+                ]
+            },
+            {
+                passage: "In 1871, a huge fire burned quickly through the city of Chicago. Because most of the buildings, sidewalks, and even roads were made of wood, the fire spread rapidly. A long summer drought had also made everything extremely dry. After the fire, the city leaders made sure Chicago was rebuilt using brick and steel to prevent such a disaster from happening again.",
+                options: [
+                    { type: "perfect", text: "The Great Chicago Fire spread quickly in 1871 because the city was mostly made of wood, leading people to rebuild with safer brick and steel." },
+                    { type: "specific", text: "The city of Chicago had been experiencing a long summer drought before the fire." },
+                    { type: "broad", text: "Fires can cause terrible damage and destroy entire cities." },
+                    { type: "incorrect", text: "The Great Chicago Fire started because a cow kicked over a lantern in a wooden barn." }
+                ]
+            },
+            {
+                passage: "Coral reefs look like colorful rocks or underwater plants, but they are actually made by tiny, jelly-like animals called polyps. Polyps build hard, calcium shells around themselves to protect their soft bodies. When millions of polyps live together and leave their hard shells behind when they die, they form a massive coral reef that provides homes for fish.",
+                options: [
+                    { type: "perfect", text: "Coral reefs are massive underwater structures built by the shells of tiny animals called polyps, providing homes for many ocean fish." },
+                    { type: "specific", text: "Polyps build hard shells out of calcium to protect their soft, jelly-like bodies." },
+                    { type: "broad", text: "There are lots of beautiful things to see when you go scuba diving in the ocean." },
+                    { type: "incorrect", text: "Coral reefs are giant, colorful underwater plants that grow from seeds in the ocean floor." }
+                ]
+            },
+            {
+                passage: "If you were to stand on the Moon, you would weigh much less than you do right now on Earth. This is because the Moon is much smaller and has less mass, which means it has a weaker gravitational pull. You wouldn't float away into space, but you would be able to jump six times higher and carry incredibly heavy objects with ease!",
+                options: [
+                    { type: "perfect", text: "The Moon has a weaker gravitational pull than Earth because it is smaller, which allows you to weigh less and jump much higher." },
+                    { type: "specific", text: "You could jump six times higher if you were standing on the surface of the Moon." },
+                    { type: "broad", text: "Gravity is a natural force that pulls things down to the ground." },
+                    { type: "incorrect", text: "On the Moon, there is zero gravity, so astronauts will float away if they don't wear heavy boots." }
+                ]
+            },
+            {
+                passage: "The Silk Road was not actually a single paved road. Instead, it was a massive network of dusty trade routes connecting ancient China with Europe and the Middle East. Merchants traveled these paths using camels to trade luxury goods like silk, spices, and glass. More than just goods, the Silk Road allowed people to share ideas, inventions, and cultures.",
+                options: [
+                    { type: "perfect", text: "The Silk Road was a network of ancient trade routes that allowed merchants to share goods, ideas, and cultures between Asia and Europe." },
+                    { type: "specific", text: "Merchants used camels to carry luxury goods like silk and spices across dusty paths." },
+                    { type: "broad", text: "People have always liked traveling and trading things with other countries." },
+                    { type: "incorrect", text: "The Silk Road was one very long, completely paved road made entirely out of silk." }
+                ]
+            },
+            {
+                passage: "Many people think bears truly hibernate by sleeping deeply all winter without ever waking up. Actually, bears enter a different state called torpor. In torpor, a bear's heart rate drops and it doesn't eat, but it can wake up easily if there is danger. True hibernators, like groundhogs, are almost impossible to wake up during the winter!",
+                options: [
+                    { type: "perfect", text: "Instead of true hibernation, bears enter a state called torpor during winter, saving energy but allowing them to wake up if necessary." },
+                    { type: "specific", text: "True hibernators, like groundhogs, are almost impossible to wake up during the winter." },
+                    { type: "broad", text: "Animals do different things to stay warm and survive during the cold winter months." },
+                    { type: "incorrect", text: "Bears sleep so deeply during the winter that absolutely nothing can wake them up until spring." }
+                ]
+            },
+            {
+                passage: "Origami is the traditional Japanese art of paper folding. The goal is to transform a single, flat square of paper into a finished 3D sculpture through folding techniques. In traditional origami, artists are absolutely not allowed to use scissors, glue, or tape. By using precise mathematical folds, they can create anything from simple cranes to complex dragons.",
+                options: [
+                    { type: "perfect", text: "Origami is a Japanese art form where artists use precise folding techniques, without cutting or gluing, to turn flat paper into 3D sculptures." },
+                    { type: "specific", text: "In traditional origami, artists are completely forbidden to use scissors, glue, or tape." },
+                    { type: "broad", text: "People can make a lot of really cool art projects just by using paper." },
+                    { type: "incorrect", text: "Origami artists use special tape and glue to hold their complex paper dragons together." }
+                ]
+            },
+            {
+                passage: "A geyser is a very rare type of hot spring that periodically erupts, shooting a giant column of hot water and steam high into the air. This happens when underground water meets deep rocks heated by magma. The water boils, building up incredible pressure until it eventually blasts up through a narrow vent in the Earth's surface.",
+                options: [
+                    { type: "perfect", text: "Geysers are rare hot springs that shoot hot water and steam into the air when underground water is heated by magma and builds up extreme pressure." },
+                    { type: "specific", text: "Underground water turns to steam when it touches rocks that are heated by deep magma." },
+                    { type: "broad", text: "There are many interesting landforms and water features located on planet Earth." },
+                    { type: "incorrect", text: "A geyser erupts because underwater volcanoes shoot actual lava right out of the hot springs." }
+                ]
+            },
+            {
+                passage: "The potato chip was supposedly invented by accident in 1853 by a chef named George Crum. A wealthy customer kept sending his fried potatoes back to the kitchen, complaining they were too thick and soggy. Annoyed, Crum sliced the potatoes extremely thin, fried them until they were crispy, and dumped extra salt on them. To his surprise, the customer loved them!",
+                options: [
+                    { type: "perfect", text: "Chef George Crum accidentally invented the potato chip in 1853 when he sliced potatoes very thin to spite a complaining customer." },
+                    { type: "specific", text: "An annoyed customer kept sending his fried potatoes back because they were too thick and soggy." },
+                    { type: "broad", text: "Many of our favorite and most famous snacks were invented a long time ago by chefs." },
+                    { type: "incorrect", text: "George Crum invented the potato chip because he wanted to make a healthy snack without any salt." }
+                ]
+            },
+            {
+                passage: "Emperor penguins are the only animals that breed during the freezing, dark winter of Antarctica. After the mother lays a single egg, she immediately leaves to hunt in the ocean. The father penguin carefully balances the egg on his feet and covers it with a warm brood pouch. He stands there for two months without eating, keeping the egg safe.",
+                options: [
+                    { type: "perfect", text: "Male emperor penguins endure the freezing Antarctic winter without eating to protect and incubate eggs on their feet while the mothers hunt." },
+                    { type: "specific", text: "The mother emperor penguin leaves to hunt in the ocean right after laying her egg." },
+                    { type: "broad", text: "Penguins are very interesting birds that have to survive in extremely cold environments." },
+                    { type: "incorrect", text: "The mother and father penguin take turns sitting on a nest made of warm rocks to keep their egg safe." }
+                ]
+            },
+            {
+                passage: "Before the 1400s, books had to be copied out entirely by hand, making them very rare and expensive. Then, Johannes Gutenberg invented the printing press. He created movable metal letters that could be arranged into words, covered in ink, and pressed onto paper. This allowed books to be made quickly and cheaply, helping ideas spread across the world.",
+                options: [
+                    { type: "perfect", text: "Johannes Gutenberg's invention of the printing press used movable metal letters to make books cheaper and faster, changing how information spread." },
+                    { type: "specific", text: "Before the invention of the printing press, all books had to be completely copied by hand." },
+                    { type: "broad", text: "Inventions throughout history have always made daily life much easier for regular people." },
+                    { type: "incorrect", text: "Johannes Gutenberg invented a special machine that wrote books by hand much faster than humans could." }
+                ]
+            }
+        ];
+
+        // --- App State ---
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answered = false;
+
+        // --- DOM Elements ---
+        const introScreen = document.getElementById('intro-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        
+        const passageText = document.getElementById('passage-text');
+        const optionsContainer = document.getElementById('options-container');
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackIcon = document.getElementById('feedback-icon');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackText = document.getElementById('feedback-text');
+        const nextBtn = document.getElementById('next-btn');
+
+        // --- Functions ---
+
+        function startPractice() {
+            introScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            quizScreen.classList.add('flex');
+            loadQuestion();
+        }
+
+        function shuffleArray(array) {
+            // Fisher-Yates shuffle
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function loadQuestion() {
+            // Reset state
+            answered = false;
+            feedbackArea.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            
+            // Get current question
+            const q = quizData[currentQuestionIndex];
+            
+            // Update UI
+            progressText.innerText = `Question ${currentQuestionIndex + 1} of ${quizData.length}`;
+            progressFill.style.width = `${((currentQuestionIndex) / quizData.length) * 100}%`;
+            passageText.innerText = q.passage;
+
+            // Clear old options
+            optionsContainer.innerHTML = '';
+
+            // Shuffle options
+            const shuffledOptions = shuffleArray([...q.options]);
+
+            // Render options
+            shuffledOptions.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn w-full text-left p-4 rounded-xl border-2 border-gray-300 bg-white hover:bg-blue-50 text-gray-700 font-medium text-lg';
+                btn.innerHTML = `<span class="font-bold mr-2">${String.fromCharCode(65 + index)}.</span> ${opt.text}`;
+                btn.onclick = () => selectOption(btn, opt);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function getFeedbackMessage(type) {
+            switch(type) {
+                case 'perfect': return "Great job! This is the perfect one-sentence summary that covers the Who, What, and Why/How.";
+                case 'specific': return "That's a true fact, but it's TOO SPECIFIC! A GIST needs to cover the whole paragraph, not just one small detail.";
+                case 'broad': return "TOO BROAD! This sentence is so general that it could be about a hundred different paragraphs. It misses the specific topic.";
+                case 'incorrect': return "INCORRECT! This fact wasn't in the text, or it actually goes against what the text said.";
+                default: return "";
+            }
+        }
+
+        function selectOption(selectedBtn, optionData) {
+            if (answered) return; // Prevent multiple clicks
+            answered = true;
+
+            const isCorrect = optionData.type === 'perfect';
+            if (isCorrect) score++;
+
+            // Style all buttons based on correctness
+            const allBtns = optionsContainer.children;
+            for (let btn of allBtns) {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-blue-50', 'border-gray-300');
+                
+                // Find the perfect answer to highlight it anyway
+                const btnText = btn.innerText.substring(3); // Remove "A. "
+                const isThisBtnPerfect = quizData[currentQuestionIndex].options.find(o => o.type === 'perfect').text === btnText;
+
+                if (btn === selectedBtn) {
+                    if (isCorrect) {
+                        btn.classList.add('bg-green-100', 'border-green-500', 'text-green-800');
+                    } else {
+                        btn.classList.add('bg-red-100', 'border-red-500', 'text-red-800');
+                    }
+                } else if (isThisBtnPerfect) {
+                    // Highlight the correct answer if they got it wrong
+                    btn.classList.add('border-green-400', 'text-green-700', 'border-dashed');
+                } else {
+                    btn.classList.add('opacity-50', 'bg-gray-50');
+                }
+            }
+
+            // Show feedback
+            feedbackArea.classList.remove('hidden', 'bg-green-50', 'bg-red-50', 'border-green-400', 'border-red-400', 'text-green-800', 'text-red-800');
+            
+            if (isCorrect) {
+                feedbackArea.classList.add('bg-green-50', 'border-green-400', 'text-green-800');
+                feedbackIcon.innerText = "✅";
+                feedbackTitle.innerText = "Perfect GIST!";
+            } else {
+                feedbackArea.classList.add('bg-red-50', 'border-red-400', 'text-red-800');
+                feedbackIcon.innerText = "🛑";
+                
+                if (optionData.type === 'specific') feedbackTitle.innerText = "Too Specific!";
+                if (optionData.type === 'broad') feedbackTitle.innerText = "Too Broad!";
+                if (optionData.type === 'incorrect') feedbackTitle.innerText = "Incorrect Fact!";
+            }
+
+            feedbackText.innerText = getFeedbackMessage(optionData.type);
+            
+            // Show Next Button
+            nextBtn.classList.remove('hidden');
+            
+            // Change button text if it's the last question
+            if (currentQuestionIndex === quizData.length - 1) {
+                nextBtn.innerText = "See Results 🏆";
+                progressFill.style.width = '100%';
+            }
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            quizScreen.classList.remove('flex');
+            resultsScreen.classList.remove('hidden');
+            
+            document.getElementById('score-text').innerText = `${score} out of ${quizData.length}`;
+        }
+
+        function restartPractice() {
+            currentQuestionIndex = 0;
+            score = 0;
+            resultsScreen.classList.add('hidden');
+            startPractice();
+        }
+
+    </script>
+</body>
+</html>
