@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summary Builder Practice - Set 2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f3ff; /* Light purple background */
+            color: #334155;
+            font-size: 18px; 
+            line-height: 1.6;
+        }
+
+        .puzzle-icon {
+            font-size: 3rem;
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        .option-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .option-btn:hover:not(:disabled) {
+            transform: translateX(4px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .passage {
+            font-size: 1.125rem; 
+            background-color: #ffffff; 
+            border-left: 6px solid #8b5cf6; /* Purple border */
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .starter-box {
+            background-color: #ede9fe;
+            border: 2px dashed #8b5cf6;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            color: #5b21b6;
+            margin-bottom: 1rem;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
+
+    <div class="w-full max-w-3xl bg-white rounded-2xl shadow-xl overflow-hidden relative fade-in" id="app-container">
+        
+        <div id="intro-screen" class="p-8 text-center">
+            <div class="puzzle-icon">🧩</div>
+            <h1 class="text-4xl font-extrabold text-purple-800 mb-4">Summary Builder</h1>
+            
+            <div class="text-left text-xl bg-purple-50 p-6 rounded-xl mb-8 space-y-4 shadow-sm border border-purple-100">
+                <p><strong>Time to build a perfect summary!</strong></p>
+                <p>Sometimes, getting a summary started is the hardest part. In this practice, we will give you the <strong>Summary Starter</strong>.</p>
+                <p>Your job is to pick the best ending to finish the sentence. Remember, a great summary ending should:</p>
+                <ul class="list-disc list-inside font-bold text-purple-700 pl-4">
+                    <li>Finish the main idea of the paragraph.</li>
+                    <li>Avoid being too specific (just a tiny detail).</li>
+                    <li>Avoid being too broad (too general).</li>
+                </ul>
+            </div>
+
+            <button onclick="startPractice()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-10 rounded-full text-2xl shadow-lg transition transform hover:scale-105 active:scale-95">
+                Start Building! 🏗️
+            </button>
+        </div>
+
+        <div id="quiz-screen" class="hidden flex-col h-full">
+            <div class="bg-purple-700 p-4 text-white flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl">🧩</span>
+                    <span class="font-bold text-xl">Summary Builder</span>
+                </div>
+                <div class="font-bold text-lg" id="progress-text">Question 1 of 10</div>
+            </div>
+            
+            <div class="w-full bg-purple-200 h-2">
+                <div id="progress-fill" class="bg-green-400 h-2 transition-all duration-300" style="width: 0%;"></div>
+            </div>
+
+            <div class="p-6 md:p-8 flex-grow fade-in" id="question-content">
+                <div class="passage" id="passage-text">
+                    </div>
+
+                <div class="starter-box">
+                    <span class="text-sm uppercase text-purple-500 tracking-wider block mb-1">Summary Starter:</span>
+                    <span id="starter-text" class="text-xl"></span>
+                </div>
+                
+                <h3 class="text-lg font-bold mb-3 text-gray-600">Choose the best ending to complete the summary:</h3>
+
+                <div class="space-y-3" id="options-container">
+                    </div>
+
+                <div id="feedback-area" class="mt-6 p-4 rounded-lg hidden text-lg border-2">
+                    <div class="flex items-start">
+                        <span id="feedback-icon" class="text-3xl mr-3"></span>
+                        <div>
+                            <h4 id="feedback-title" class="font-bold text-xl mb-1"></h4>
+                            <p id="feedback-text"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-end">
+                    <button id="next-btn" onclick="nextQuestion()" class="hidden bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full text-xl shadow-md transition transform hover:scale-105">
+                        Next Paragraph ➡️
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="results-screen" class="hidden p-8 text-center fade-in">
+            <h2 class="text-4xl font-extrabold text-purple-800 mb-6">Building Complete! 🎉</h2>
+            <div class="text-2xl mb-8">
+                You built the perfect summary <span id="score-text" class="font-bold text-green-600 text-4xl"></span> times!
+            </div>
+            
+            <div class="bg-gray-100 p-6 rounded-xl mb-8 text-left text-lg max-w-lg mx-auto shadow-inner border-l-4 border-purple-500">
+                <h3 class="font-bold text-xl mb-2">Great job!</h3>
+                <p>You practiced how to take a sentence starter and finish it with the most important information. Next time you write your own summary, try creating your own starters!</p>
+            </div>
+
+            <button onclick="restartPractice()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-10 rounded-full text-2xl shadow-lg transition transform hover:scale-105">
+                Practice Again 🔄
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- NEW SET: 10 Reading Passages with Starters and Continuations ---
+        const quizData = [
+            {
+                passage: "The Venus flytrap is a unique plant that gets its nutrients by eating insects. It has special leaves that act like a jaw. When a bug lands on the tiny hairs inside the leaves, the trap snaps shut in less than a second! The plant then digests the bug over several days to get the vitamins it needs to survive in poor soil.",
+                starter: "Because it grows in poor soil, the Venus flytrap...",
+                options: [
+                    { type: "perfect", text: "...catches and digests insects in its special snap-trap leaves to get the nutrients it needs." },
+                    { type: "specific", text: "...snaps its leaves shut in less than a second when a bug lands on tiny hairs." },
+                    { type: "broad", text: "...eats things to survive in nature." },
+                    { type: "incorrect", text: "...uses its jaws to chew up bugs instantly so it can grow taller." }
+                ]
+            },
+            {
+                passage: "The Great Wall of China was not built all at once, nor is it a single continuous wall. It is actually a series of many different walls and fortifications built by various Chinese dynasties over thousands of years. The primary purpose was to protect the Chinese Empire from invading nomadic groups from the north.",
+                starter: "Built over thousands of years by different dynasties, the Great Wall of China...",
+                options: [
+                    { type: "perfect", text: "...is a series of walls created to protect the Chinese Empire from northern invaders." },
+                    { type: "specific", text: "...was not built all at once as a single continuous wall." },
+                    { type: "broad", text: "...is a very long and old building in Asia." },
+                    { type: "incorrect", text: "...was built to keep the Chinese people from leaving the empire." }
+                ]
+            },
+            {
+                passage: "Coral reefs are often called the 'rainforests of the sea' because they are home to thousands of different ocean species. Even though they cover less than one percent of the ocean floor, they support about 25 percent of all marine life. Corals themselves are not rocks or plants; they are actually tiny animals called polyps that build hard limestone skeletons.",
+                starter: "Although they are made of tiny animals and cover a tiny part of the ocean floor, coral reefs...",
+                options: [
+                    { type: "perfect", text: "...support a massive amount of marine life, making them the 'rainforests of the sea.'" },
+                    { type: "specific", text: "...are built by tiny animals called polyps that make hard limestone skeletons." },
+                    { type: "broad", text: "...are found in the ocean and have a lot of animals living in them." },
+                    { type: "incorrect", text: "...are underwater forests made of ocean plants that grow on rocks." }
+                ]
+            },
+            {
+                passage: "The chocolate we eat starts out as bitter seeds inside the pod of a cacao tree. To get from a bitter seed to a sweet chocolate bar, the seeds must be fermented, dried, and roasted to develop their flavor. After that, they are ground up and mixed with sugar and milk to create the sweet treat people love.",
+                starter: "To turn bitter cacao seeds into sweet chocolate, they must...",
+                options: [
+                    { type: "perfect", text: "...go through a long process of fermenting, roasting, and mixing with sugar and milk." },
+                    { type: "specific", text: "...be taken out of the pod of a cacao tree." },
+                    { type: "broad", text: "...be cooked and changed before we can eat them." },
+                    { type: "incorrect", text: "...be planted in the ground so they can grow into sweet chocolate bars." }
+                ]
+            },
+            {
+                passage: "Many bats are nocturnal, meaning they are active at night. To fly and hunt in the dark without crashing into things, they use a superpower called echolocation. A bat sends out a high-pitched squeak that bounces off objects and returns as an echo. By listening to the echo, the bat knows exactly where a delicious mosquito or a dangerous branch is located.",
+                starter: "To navigate and hunt in the dark, nocturnal bats...",
+                options: [
+                    { type: "perfect", text: "...use echolocation to bounce sound waves off objects and find their prey." },
+                    { type: "specific", text: "...send out a high-pitched squeak that bounces off a dangerous branch." },
+                    { type: "broad", text: "...fly around at night looking for insects to eat." },
+                    { type: "incorrect", text: "...use their super-powered glowing eyes to see mosquitoes in the pitch black." }
+                ]
+            },
+            {
+                passage: "Mount Everest is the tallest mountain on Earth, peaking at over 29,000 feet above sea level. Because it is so high, the air near the top has very little oxygen, making it extremely dangerous for humans. Climbers who attempt to reach the summit must train for years, use bottled oxygen, and slowly get used to the extreme altitude to avoid getting sick.",
+                starter: "Because Mount Everest's extreme height means there is very little oxygen, climbers...",
+                options: [
+                    { type: "perfect", text: "...must train heavily and use bottled oxygen to safely reach the dangerous summit." },
+                    { type: "specific", text: "...climb up to 29,000 feet above sea level." },
+                    { type: "broad", text: "...have a very hard time walking up the mountain." },
+                    { type: "incorrect", text: "...hold their breath for a very long time so they don't get sick at the top." }
+                ]
+            },
+            {
+                passage: "Before the invention of the printing press in the 1440s, books had to be copied by hand, which made them incredibly rare and expensive. Johannes Gutenberg's machine used movable metal type to quickly print multiple copies of a page. This invention changed the world by making books cheaper and allowing information and ideas to spread rapidly to ordinary people.",
+                starter: "By making it possible to quickly print multiple copies of books, Johannes Gutenberg's printing press...",
+                options: [
+                    { type: "perfect", text: "...made books affordable and allowed information to spread rapidly to the public." },
+                    { type: "specific", text: "...was invented in the 1440s using movable metal type." },
+                    { type: "broad", text: "...changed the way people did things a long time ago." },
+                    { type: "incorrect", text: "...made it easier for people to copy books by hand using metal pens." }
+                ]
+            },
+            {
+                passage: "Emperor penguins survive in the freezing temperatures of Antarctica by working together. During the harsh winter storms, hundreds of male penguins will huddle tightly together in a massive group to share body heat. They take turns moving from the freezing outer edge of the huddle to the warm and cozy center so that no single penguin freezes.",
+                starter: "To survive the freezing storms of Antarctica, Emperor penguins...",
+                options: [
+                    { type: "perfect", text: "...huddle tightly together in large groups and take turns warming up in the center." },
+                    { type: "specific", text: "...wait until winter when hundreds of male penguins gather." },
+                    { type: "broad", text: "...do things to stay warm in the cold weather." },
+                    { type: "incorrect", text: "...build warm shelters out of snow so they don't freeze on the outer edge." }
+                ]
+            },
+            {
+                passage: "In 1928, scientist Alexander Fleming accidentally discovered the first antibiotic. He left a petri dish of bacteria uncovered in his messy laboratory and went on vacation. When he returned, he saw that a fuzzy green mold had grown in the dish, and the bacteria around the mold had died! This mold, called Penicillium, led to the medicine that has saved millions of lives from infections.",
+                starter: "By accidentally leaving a petri dish uncovered in his lab, Alexander Fleming...",
+                options: [
+                    { type: "perfect", text: "...discovered a mold that killed bacteria, leading to the first life-saving antibiotic medicine." },
+                    { type: "specific", text: "...saw that a fuzzy green mold had grown while he was on vacation." },
+                    { type: "broad", text: "...found out something new about science." },
+                    { type: "incorrect", text: "...invented a new type of bacteria that could clean up messy laboratories." }
+                ]
+            },
+            {
+                passage: "Tornadoes are powerful, twisting columns of air that reach from a thunderstorm down to the ground. They form when warm, moist air collides with cold, dry air, creating massive instability in the atmosphere. The spinning winds of a severe tornado can reach over 200 miles per hour, destroying buildings and tossing cars like toys in a matter of seconds.",
+                starter: "When warm and cold air collide during a thunderstorm, it can create...",
+                options: [
+                    { type: "perfect", text: "...a tornado with incredibly fast, spinning winds that cause massive destruction." },
+                    { type: "specific", text: "...spinning winds that can reach over 200 miles per hour." },
+                    { type: "broad", text: "...bad weather that makes a lot of wind." },
+                    { type: "incorrect", text: "...a twisted column of air that pulls cold, dry air up from the ground into the clouds." }
+                ]
+            }
+        ];
+
+        // --- App State ---
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answered = false;
+
+        // --- DOM Elements ---
+        const introScreen = document.getElementById('intro-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        
+        const passageText = document.getElementById('passage-text');
+        const starterText = document.getElementById('starter-text');
+        const optionsContainer = document.getElementById('options-container');
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackIcon = document.getElementById('feedback-icon');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackText = document.getElementById('feedback-text');
+        const nextBtn = document.getElementById('next-btn');
+
+        // --- Functions ---
+
+        function startPractice() {
+            introScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            quizScreen.classList.add('flex');
+            loadQuestion();
+        }
+
+        function shuffleArray(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function loadQuestion() {
+            answered = false;
+            feedbackArea.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            
+            const q = quizData[currentQuestionIndex];
+            
+            progressText.innerText = `Question ${currentQuestionIndex + 1} of ${quizData.length}`;
+            progressFill.style.width = `${((currentQuestionIndex) / quizData.length) * 100}%`;
+            passageText.innerText = q.passage;
+            starterText.innerText = q.starter;
+
+            optionsContainer.innerHTML = '';
+
+            const shuffledOptions = shuffleArray([...q.options]);
+
+            shuffledOptions.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn w-full text-left p-4 rounded-xl border-2 border-gray-300 bg-white hover:bg-purple-50 text-gray-700 font-medium text-lg';
+                btn.innerHTML = opt.text;
+                btn.onclick = () => selectOption(btn, opt);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function getFeedbackMessage(type) {
+            switch(type) {
+                case 'perfect': return "Awesome! You completed the sentence perfectly with the most important ideas.";
+                case 'specific': return "That's true, but it's TOO SPECIFIC! This ending only talks about a tiny detail, not the whole main idea.";
+                case 'broad': return "TOO BROAD! This ending is way too general. It doesn't give us the specific facts we need for a good summary.";
+                case 'incorrect': return "INCORRECT! That fact wasn't in the paragraph, or it's not quite right.";
+                default: return "";
+            }
+        }
+
+        function selectOption(selectedBtn, optionData) {
+            if (answered) return; 
+            answered = true;
+
+            const isCorrect = optionData.type === 'perfect';
+            if (isCorrect) score++;
+
+            const allBtns = optionsContainer.children;
+            for (let btn of allBtns) {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-purple-50', 'border-gray-300');
+                
+                const isThisBtnPerfect = quizData[currentQuestionIndex].options.find(o => o.type === 'perfect').text === btn.innerText;
+
+                if (btn === selectedBtn) {
+                    if (isCorrect) {
+                        btn.classList.add('bg-green-100', 'border-green-500', 'text-green-800');
+                    } else {
+                        btn.classList.add('bg-red-100', 'border-red-500', 'text-red-800');
+                    }
+                } else if (isThisBtnPerfect) {
+                    btn.classList.add('border-green-400', 'text-green-700', 'border-dashed');
+                } else {
+                    btn.classList.add('opacity-50', 'bg-gray-50');
+                }
+            }
+
+            feedbackArea.classList.remove('hidden', 'bg-green-50', 'bg-red-50', 'border-green-400', 'border-red-400', 'text-green-800', 'text-red-800');
+            
+            if (isCorrect) {
+                feedbackArea.classList.add('bg-green-50', 'border-green-400', 'text-green-800');
+                feedbackIcon.innerText = "✅";
+                feedbackTitle.innerText = "Perfect Ending!";
+            } else {
+                feedbackArea.classList.add('bg-red-50', 'border-red-400', 'text-red-800');
+                feedbackIcon.innerText = "🛑";
+                
+                if (optionData.type === 'specific') feedbackTitle.innerText = "Too Specific!";
+                if (optionData.type === 'broad') feedbackTitle.innerText = "Too Broad!";
+                if (optionData.type === 'incorrect') feedbackTitle.innerText = "Incorrect Fact!";
+            }
+
+            feedbackText.innerText = getFeedbackMessage(optionData.type);
+            
+            nextBtn.classList.remove('hidden');
+            
+            if (currentQuestionIndex === quizData.length - 1) {
+                nextBtn.innerText = "See Results 🏆";
+                progressFill.style.width = '100%';
+            }
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            quizScreen.classList.remove('flex');
+            resultsScreen.classList.remove('hidden');
+            
+            document.getElementById('score-text').innerText = `${score} out of ${quizData.length}`;
+        }
+
+        function restartPractice() {
+            currentQuestionIndex = 0;
+            score = 0;
+            resultsScreen.classList.add('hidden');
+            startPractice();
+        }
+
+    </script>
+</body>
+</html>
